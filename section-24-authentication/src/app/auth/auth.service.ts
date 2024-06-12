@@ -31,7 +31,16 @@ export class AuthService {
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyA8j-g2R9xfZ8NzVvnVUNtbmGSc4w_QJK8",
         credentials
       )
-      .pipe(catchError(this.handleError), tap(this.handleAuthentication));
+      .pipe(catchError(this.handleError), tap(
+        (resData) => {
+          this.handleAuthentication(
+            resData.email,
+            resData.localId,
+            resData.idToken,
+            +resData.expiresIn
+          );
+        }
+      ));
   }
 
   login(email: string, password: string) {
@@ -46,21 +55,31 @@ export class AuthService {
         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyA8j-g2R9xfZ8NzVvnVUNtbmGSc4w_QJK8",
         credentials
       )
-      .pipe(catchError(this.handleError), tap(this.handleAuthentication));
+      .pipe(
+        catchError(this.handleError),
+        tap(
+          (resData) => {
+          this.handleAuthentication(
+            resData.email,
+            resData.localId,
+            resData.idToken,
+            +resData.expiresIn
+          );
+        }
+      )
+      );
   }
 
-  private handleAuthentication(email: string, userId: string, token: string, expiresIn: number) {
+  private handleAuthentication(
+    email: string,
+    userId: string,
+    token: string,
+    expiresIn: number
+  ) {
     // first we get the currect time
     // then we add the time of expiration after we mulitply it with 1000 because expiresin is in seconds and we want it into mili seconds.
-    const expirationDate = new Date(
-      new Date().getTime() + expiresIn * 1000
-    );
-    const user = new User(
-      email.email,
-      userId.localId,
-      token.idToken,
-      expirationDate
-    );
+    const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
+    const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
   }
 

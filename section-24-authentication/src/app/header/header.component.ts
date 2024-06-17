@@ -4,6 +4,7 @@ import { OnInit, OnDestroy } from '@angular/core';
 import { DataStorageService } from '../shared/data-storage.service';
 import { AuthService } from '../auth/auth.service';
 import { Subscription } from 'rxjs';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -36,5 +37,9 @@ export class HeaderComponent implements  OnInit, OnDestroy{
 
   ngOnDestroy(): void {
     this.userSubscription.unsubscribe();
+  }
+
+  onLogout() {
+    this.authService.logout();
   }
 }
